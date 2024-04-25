@@ -1,0 +1,6 @@
+os/target
+user/target
+debugger
+bootloader
+.vscode
+.DS_Store
