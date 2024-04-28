@@ -1,6 +1,8 @@
-os/target
-user/target
 debugger
 bootloader
-.vscode
 .DS_Store
+
+os/src/link_app.S
+**/target/
+*.lock
+
