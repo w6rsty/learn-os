@@ -1,4 +1,7 @@
-use crate::{sbi::shutdown, stack_trace::print_stack_trace};
+use crate::{
+    sbi::shutdown, 
+    stack_trace::print_stack_trace
+};
 use core::panic::PanicInfo;
 
 #[panic_handler]
