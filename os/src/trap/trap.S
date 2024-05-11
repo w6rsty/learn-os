@@ -34,7 +34,7 @@ __alltraps:
     call trap_handler
 
 __restore:
-    mv sp, a0 # sp<-a0 (kernel)
+    # mv sp, a0 # sp<-a0 (kernel)
     # now sp->kernel stack, sscratch->user stack
     # restore user stack
     ld t0, 32*8(sp) # sstatus

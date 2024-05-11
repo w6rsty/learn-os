@@ -5,15 +5,15 @@ KERNEL_ELF := target/$(TARGET)/$(MODE)/os
 KERNEL_BIN := $(KERNEL_ELF).bin
 DISASM_TMP := target/$(TARGET)/$(MODE)/asm
 
-# Building mode argument
-ifeq ($(MODE), release)
-	MODE_ARG := --release
-endif
-
 # BOARD
 BOARD := qemu
 SBI ?= rustsbi
 BOOTLOADER := ../bootloader/$(SBI)-$(BOARD).bin
+
+# Building mode argument
+ifeq ($(MODE), release)
+	MODE_ARG := --release
+endif
 
 # KERNEL ENTRY
 KERNEL_ENTRY_PA := 0x80200000
@@ -25,15 +25,12 @@ OBJCOPY := rust-objcopy --binary-architecture=riscv64
 # Disassembly
 DISASM ?= -x
 
-DEBUGGER := ../debugger/riscv64-unknown-elf-gdb 
+DEBUGGER := ../debugger/riscv64-unknown-elf-gdb
 
 build: env $(KERNEL_BIN)
 
 env:
 	(rustup target list | grep "riscv64gc-unknown-none-elf (installed)") || rustup target add $(TARGET)
-	cargo install cargo-binutils
-	rustup component add rust-src
-	rustup component add llvm-tools-preview
 
 $(KERNEL_BIN): kernel
 	@$(OBJCOPY) $(KERNEL_ELF) --strip-all -O binary $@
@@ -45,7 +42,6 @@ kernel:
 	@cargo build $(MODE_ARG)
 	@rm src/linker.ld
 
-
 clean:
 	@cargo clean
 
@@ -54,7 +50,7 @@ disasm: kernel
 
 disasm-vim: kernel
 	@$(OBJDUMP) $(DISASM) $(KERNEL_ELF) > $(DISASM_TMP)
-	@vim $(DISASM_TMP)
+	@nvim $(DISASM_TMP)
 	@rm $(DISASM_TMP)
 
 run: run-inner
