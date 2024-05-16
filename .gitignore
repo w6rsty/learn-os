@@ -1,5 +1,4 @@
 debugger
-bootloader
 .DS_Store
 
 os/src/link_app.S
