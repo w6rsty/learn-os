@@ -6,7 +6,8 @@ use riscv::register::time;
 
 const TICKS_PER_SEC: usize = 100;
 const MSEC_PER_SEC: usize = 1_000;
-
+#[allow(unused)]
+const USEC_PER_SEC: usize = 1_000_000;
 // Get current time in terms of timer ticks
 pub fn get_time() -> usize {
     time::read()
@@ -15,6 +16,12 @@ pub fn get_time() -> usize {
 // Get current time in terms of milliseconds
 pub fn get_time_ms() -> usize {
     time::read() / (CLOCK_FREQ / MSEC_PER_SEC)
+}
+
+// Get current time in terms of microseconds 
+#[allow(unused)]
+pub fn get_time_us() -> usize {
+    time::read() / (CLOCK_FREQ / USEC_PER_SEC)
 }
 
 pub fn set_next_trigger() {

@@ -32,9 +32,38 @@ fn clear_bss() {
     });
 }
 
+#[derive(Debug, Clone, Copy, PartialEq)]
+pub enum TaskStatus {
+    UnInit,
+    Ready,
+    Running,
+    Exited
+}
+
+const MAX_SYSCALL_NUM: usize = 500;
+
+#[derive(Debug)]
+#[allow(dead_code)]
+pub struct TaskInfo {
+    status: TaskStatus,
+    syscall_times: [u32; MAX_SYSCALL_NUM],
+    times: usize,
+}
+
+impl TaskInfo {
+    pub fn new() -> Self {
+        TaskInfo {
+            status: TaskStatus::UnInit,
+            syscall_times: [0; MAX_SYSCALL_NUM],
+            times: 0,
+        }
+    }
+}
+
 use syscall::*;
 
 pub fn write(fd: usize, buf: &[u8]) -> isize { sys_write(fd, buf) }
 pub fn exit(exit_code: i32) -> isize { sys_exit(exit_code) }
 pub fn yield_() -> isize { sys_yield() }
 pub fn get_time() -> isize { sys_get_time() }
+pub fn task_info(ti: &TaskInfo) -> isize { sys_get_task_info(ti) }

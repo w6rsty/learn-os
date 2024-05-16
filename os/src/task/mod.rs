@@ -1,10 +1,12 @@
 mod context;     
 mod switch;
-mod task;
-
+pub mod task;
 
 use crate::{
-    config::MAX_APP_NUM, loader::{get_num_app, init_app_cx}, sbi::shutdown, sync::UPSafeCell
+    config::{MAX_APP_NUM, MAX_SYSCALL_NUM},
+    loader::{get_num_app, init_app_cx},
+    sbi::shutdown,
+    sync::UPSafeCell,
 };
 use task::{TaskControlBlock, TaskStatus};
 use lazy_static::*;
@@ -77,6 +79,20 @@ impl TaskManager {
             shutdown(false);
         }
     }
+
+    fn get_current_task_tcb(&self) -> TaskControlBlock {
+        let inner = self.inner.exclusive_access();
+        inner.tasks[inner.current_task]
+    }
+
+    fn increate_current_task_syscall_times(&self, syscall_id: usize) {
+        if syscall_id >= MAX_SYSCALL_NUM {
+            return;
+        }
+        let mut inner = self.inner.exclusive_access();
+        let current = inner.current_task;
+        inner.tasks[current].syscall_times[syscall_id] += 1;
+    }
 }
 
 lazy_static! {
@@ -85,8 +101,10 @@ lazy_static! {
         // Create TaskControlBlocks
         let mut tasks = [
             TaskControlBlock {
-            task_cx: TaskContext::zero_init(),
-            task_status: TaskStatus::UnInit,
+                task_cx: TaskContext::zero_init(),
+                task_status: TaskStatus::UnInit,
+                syscall_times: [0; MAX_SYSCALL_NUM],
+                start_time: 0
             }; MAX_APP_NUM
         ];
         // Setup TaskContext
@@ -128,4 +146,12 @@ pub fn exit_current_and_run_next() {
 pub fn suspend_current_and_run_next() {
     mark_current_suspended();
     run_next_task();
+}
+
+pub fn get_current_task_tcb() -> TaskControlBlock {
+    TASK_MANAGER.get_current_task_tcb()
+}
+
+pub fn increase_current_task_syscall_times(syscall_id: usize) {
+    TASK_MANAGER.increate_current_task_syscall_times(syscall_id);
 }

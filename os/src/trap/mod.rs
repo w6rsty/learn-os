@@ -2,7 +2,7 @@ mod context;
 
 use crate::{
     syscall::syscall,
-    task::{exit_current_and_run_next,suspend_current_and_run_next},
+    task::{exit_current_and_run_next, increase_current_task_syscall_times, suspend_current_and_run_next},
     timer::set_next_trigger,
 };
 use core::arch::global_asm;
@@ -36,6 +36,7 @@ pub fn trap_handler(cx: &mut TrapContext) -> &mut TrapContext {
     let stval = stval::read();
     match scause.cause() {
         Trap::Exception(Exception::UserEnvCall) => {
+            increase_current_task_syscall_times(cx.x[17]);
             cx.sepc += 4; // set to next instruction after ecall
             cx.x[10] = syscall(cx.x[17], [cx.x[10], cx.x[11], cx.x[12]]) as usize;
         }
